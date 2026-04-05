@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CM Helpline 1905 — Grievance Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#1B3A8A;--accent:#3F6FEF;--accent-h:#2E5BD4;
+  --bg:#F0F3FB;--card:#fff;--sidebar:#0D1E50;--sidebar2:#142562;
+  --t1:#0A1628;--t2:#4A5772;--t3:#8A97B2;--border:#E2E8F2;--border2:#ECF0F8;
+  --suc:#0A8A4A;--suc-bg:#EDFBF4;--suc-b:#A7F3D0;
+  --warn:#C97706;--warn-bg:#FFFBEB;--warn-b:#FCD34D;
+  --dan:#C03030;--dan-bg:#FEF2F2;--dan-b:#FECACA;
+  --info:#3F6FEF;--info-bg:#EEF2FF;--info-b:#BFDBFE;
+  --r1:6px;--r2:10px;--r3:14px;--r4:20px;
+  --sh:0 1px 4px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);
+  --sh2:0 4px 16px rgba(0,0,0,.09);--sh3:0 8px 32px rgba(0,0,0,.12);
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t1);font-size:14px;line-height:1.5}
+
+/* ===== GLOBAL HEADER ===== */
+#appHeader{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--sidebar);height:56px;display:flex;align-items:center;padding:0 24px;gap:20px;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.header-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.header-logo .emblem{width:32px;height:32px;background:linear-gradient(135deg,#f5a623,#e8831a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.header-logo .brand-text{line-height:1.2}
+.header-logo .brand-main{font-size:14px;font-weight:700;color:#fff;letter-spacing:.01em}
+.header-logo .brand-sub{font-size:11px;color:rgba(255,255,255,.5);font-weight:400}
+.role-switcher{display:flex;gap:4px;background:rgba(255,255,255,.08);border-radius:var(--r4);padding:4px;margin:0 auto}
+.role-btn{padding:6px 18px;border-radius:var(--r4);border:none;background:transparent;color:rgba(255,255,255,.6);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.role-btn.active{background:#fff;color:var(--sidebar);box-shadow:var(--sh)}
+.role-btn:hover:not(.active){color:#fff;background:rgba(255,255,255,.12)}
+.demo-badge{font-size:11px;padding:3px 10px;background:rgba(245,166,35,.2);color:#f5a623;border:1px solid rgba(245,166,35,.3);border-radius:var(--r4);flex-shrink:0;font-weight:500}
+
+/* ===== VIEWS ===== */
+.view{display:none;padding-top:56px;min-height:100vh}
+.view.active{display:block}
+
+/* ===== TOAST ===== */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--t1);color:#fff;padding:10px 20px;border-radius:var(--r4);font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--suc)}
+#toast.error{background:var(--dan)}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:#fff;border-radius:var(--r3);padding:28px;width:440px;max-width:calc(100vw - 32px);box-shadow:var(--sh3);transform:translateY(12px);transition:transform .2s}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--t2);margin-bottom:20px}
+.modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--t3);margin-top:-4px}
+
+/* ===== SHARED COMPONENTS ===== */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r2);border:1px solid var(--border);background:#fff;color:var(--t1);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none}
+.btn:hover{background:var(--bg);border-color:#c5cedf}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-h);border-color:var(--accent-h)}
+.btn-success{background:var(--suc);color:#fff;border-color:var(--suc)}
+.btn-success:hover{opacity:.9}
+.btn-danger{background:var(--dan-bg);color:var(--dan);border-color:var(--dan-b)}
+.btn-danger:hover{background:#fde8e8}
+.btn-warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-b)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-lg{padding:12px 24px;font-size:14px;font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r3);box-shadow:var(--sh)}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;color:var(--t1)}
+.card-body{padding:16px 18px}
+
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--r4);font-size:11px;font-weight:600;letter-spacing:.02em}
+.pill-open{background:#FFF3E0;color:#B45309}
+.pill-prog{background:#EEF2FF;color:#3730A3}
+.pill-esc{background:var(--dan-bg);color:var(--dan)}
+.pill-done{background:var(--suc-bg);color:var(--suc)}
+.pill-new{background:#F3E8FF;color:#7E22CE}
+
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-high{background:#E24B4A}
+.dot-med{background:#EF9F27}
+.dot-low{background:#4CAF50}
+
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.form-control{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r2);font-family:var(--font);font-size:13px;color:var(--t1);background:#fff;transition:border .15s;outline:none}
+.form-control:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(63,111,239,.12)}
+.form-control.ai-filled{border-color:var(--info);background:var(--info-bg);color:var(--info)}
+textarea.form-control{resize:vertical;min-height:80px;line-height:1.5}
+select.form-control{cursor:pointer}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+.sla-track{height:5px;background:#EDF0F7;border-radius:3px;overflow:hidden}
+.sla-fill{height:100%;border-radius:3px;transition:width .4s}
+
+.timeline{list-style:none;padding-left:20px;position:relative}
+.timeline::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:12px;font-size:12px}
+.tl-item::before{content:'';position:absolute;left:-15px;top:5px;width:8px;height:8px;border-radius:50%;background:#D1D9EE;border:2px solid #fff;box-shadow:0 0 0 1px #D1D9EE}
+.tl-item.active::before{background:var(--accent);box-shadow:0 0 0 3px rgba(63,111,239,.2)}
+.tl-text{color:var(--t1);line-height:1.4}
+.tl-time{color:var(--t3);font-size:11px;margin-top:2px}
+
+.ai-box{background:var(--info-bg);border:1px solid var(--info-b);border-radius:var(--r2);padding:12px 14px}
+.ai-label{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.ai-text{font-size:12px;color:#3730A3;line-height:1.6}
+.ai-tag{font-size:10px;background:var(--accent);color:#fff;padding:1px 7px;border-radius:var(--r4);font-weight:600}
+
+/* ===== CITIZEN VIEW ===== */
+#citizenView{background:var(--bg)}
+.citizen-hero{background:linear-gradient(135deg,var(--sidebar) 0%,#1a3d9f 100%);padding:32px 0 0;position:relative;overflow:hidden}
+.citizen-hero::before{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.04)}
+.citizen-hero::after{content:'';position:absolute;left:30%;bottom:-40px;width:180px;height:180px;border-radius:50%;background:rgba(63,111,239,.15)}
+.citizen-container{max-width:860px;margin:0 auto;padding:0 24px}
+.citizen-hero-content{position:relative;z-index:1;margin-bottom:24px}
+.citizen-hero h1{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px}
+.citizen-hero p{font-size:13px;color:rgba(255,255,255,.65)}
+.citizen-tabs{display:flex;gap:0;margin-top:20px;position:relative;z-index:1}
+.citizen-tab{padding:12px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;border:none;background:none;font-family:var(--font)}
+.citizen-tab.active{color:#fff;border-bottom-color:#fff}
+.citizen-tab:hover:not(.active){color:rgba(255,255,255,.85)}
+.citizen-content{max-width:860px;margin:24px auto;padding:0 24px;padding-bottom:40px}
+
+.track-input-row{display:flex;gap:10px;margin-bottom:20px}
+.track-input-row .form-control{flex:1}
+.ticket-result{display:none}
+.ticket-result.show{display:block}
+
+.status-card{border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;margin-top:16px}
+.status-card-head{padding:16px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ticket-id-display{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--t1);letter-spacing:.02em}
+.status-card-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:14px 18px;background:var(--bg);border-top:1px solid var(--border2)}
+.meta-item{font-size:12px}
+.meta-label{color:var(--t3);margin-bottom:3px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.meta-val{color:var(--t1);font-weight:500}
+.citizen-notif{background:#e8f5e9;border:1px solid #a5d6a7;border-radius:var(--r2);padding:12px 14px;font-size:13px;color:#2E7D32;line-height:1.6;margin-top:12px}
+
+.my-tickets-list{display:flex;flex-direction:column;gap:10px}
+.my-ticket-card{background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:box-shadow .15s}
+.my-ticket-card:hover{box-shadow:var(--sh2)}
+.my-ticket-id{font-family:var(--mono);font-size:12px;color:var(--t3);flex-shrink:0}
+.my-ticket-cat{font-size:13px;font-weight:500;flex:1}
+.my-ticket-desc{font-size:12px;color:var(--t2);margin-top:2px}
+.csat-stars{display:flex;gap:6px;margin-top:10px}
+.csat-star{font-size:22px;cursor:pointer;color:#D1D9EE;transition:color .1s}
+.csat-star.on{color:#F59E0B}
+
+/* ===== SUCCESS SCREEN ===== */
+.submit-success{display:none;text-align:center;padding:32px 20px}
+.submit-success.show{display:block}
+.submit-form-wrap{display:block}
+.submit-form-wrap.hide{display:none}
+.success-icon{width:64px;height:64px;background:var(--suc-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px}
+.success-ticket{font-size:24px;font-weight:700;font-family:var(--mono);color:var(--accent);letter-spacing:.04em;margin:12px 0 6px}
+
+/* ===== CSE VIEW ===== */
+#cseView{background:var(--bg)}
+.cse-layout{display:grid;grid-template-columns:1fr 320px;gap:16px;padding:20px 24px;max-width:1200px;margin:0 auto;padding-bottom:40px}
+.cse-panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:12px}
+.call-indicator{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#FEF2F2;border:1px solid var(--dan-b);border-radius:var(--r2);margin-bottom:14px}
+.call-dot{width:8px;height:8px;border-radius:50%;background:var(--dan);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.call-info{font-size:13px;font-weight:600;color:var(--dan);flex:1}
+.call-timer{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--dan)}
+.transcript-box{border:1px solid var(--border);border-radius:var(--r2);padding:12px;background:#fafbfd;min-height:90px;font-size:13px;color:var(--t2);line-height:1.7;position:relative;margin-bottom:14px;font-style:italic}
+.transcript-cursor{display:inline-block;width:2px;height:14px;background:var(--accent);vertical-align:middle;margin-left:2px;animation:blink .8s infinite}
+.ai-fill-bar{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--info-bg);border:1px solid var(--info-b);border-radius:var(--r2);margin-bottom:14px}
+.ai-fill-label{font-size:12px;font-weight:600;color:var(--accent);flex:1}
+.ai-progress{flex:1;height:4px;background:#BFDBFE;border-radius:2px;overflow:hidden}
+.ai-progress-fill{height:100%;background:var(--accent);border-radius:2px;width:0;transition:width .4s}
+.cse-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--border2)}
+
+.queue-item{background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:12px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.queue-item:hover{border-color:var(--accent);box-shadow:var(--sh)}
+.queue-item.active-item{border-color:var(--accent);background:var(--info-bg)}
+.queue-caller{font-size:13px;font-weight:600;margin-bottom:2px}
+.queue-phone{font-size:11px;color:var(--t3);font-family:var(--mono)}
+.queue-issue{font-size:12px;color:var(--t2);margin-top:4px}
+.queue-wait{font-size:11px;color:var(--warn);font-weight:500;margin-top:3px}
+.queue-status-badge{float:right;font-size:10px;padding:2px 8px;border-radius:var(--r4);font-weight:600}
+.qb-wait{background:#FFF3E0;color:#B45309}
+.qb-active{background:var(--dan-bg);color:var(--dan)}
+.qb-done{background:var(--suc-bg);color:var(--suc)}
+
+.cse-submit-success{display:none;text-align:center;padding:40px 20px;animation:fadeIn .3s}
+.cse-submit-success.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== OFFICER VIEW ===== */
+#officerView{background:var(--bg)}
+.officer-layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 56px)}
+.officer-sidebar{background:var(--sidebar);overflow-y:auto}
+.sidebar-section{padding:8px 0}
+.sidebar-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.3);padding:10px 18px 5px}
+.sidebar-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:13px;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:var(--font);border-left:3px solid transparent}
+.sidebar-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+.sidebar-item.active{background:rgba(63,111,239,.2);color:#fff;border-left-color:var(--accent)}
+.sidebar-item .ic{width:16px;font-size:14px;flex-shrink:0;text-align:center}
+.sidebar-badge{margin-left:auto;background:rgba(220,50,50,.7);color:#fff;font-size:10px;padding:1px 7px;border-radius:var(--r4);font-weight:600}
+.sidebar-badge-w{background:rgba(217,119,6,.7)}
+.sidebar-officer-chip{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.officer-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3F6FEF,#7C3AED);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.officer-name{font-size:13px;font-weight:600;color:#fff;line-height:1.2}
+.officer-dept{font-size:11px;color:rgba(255,255,255,.45)}
+
+.officer-main{display:flex;flex-direction:column;overflow:hidden}
+.officer-topbar{padding:12px 20px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.officer-topbar-title{font-size:16px;font-weight:700;flex:1}
+.officer-content{flex:1;overflow-y:auto;padding:16px 20px;display:grid;grid-template-columns:1fr 340px;gap:16px;align-content:start}
+.officer-metrics{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.metric-card{background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px}
+.metric-label{font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.metric-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:4px}
+.metric-sub{font-size:11px;color:var(--t3)}
+.metric-trend{font-size:11px;font-weight:500}
+.metric-trend.up{color:var(--suc)}
+.metric-trend.down{color:var(--dan)}
+
+.tickets-panel{display:flex;flex-direction:column}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.fpill{padding:4px 12px;border-radius:var(--r4);border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;background:#fff;color:var(--t2);transition:all .15s;font-family:var(--font)}
+.fpill:hover{border-color:#b0bdd8;color:var(--t1)}
+.fpill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.search-box{position:relative;flex:1;min-width:140px}
+.search-box input{width:100%;padding:6px 10px 6px 30px;border-radius:var(--r2);border:1px solid var(--border);font-family:var(--font);font-size:12px;color:var(--t1);outline:none}
+.search-box input:focus{border-color:var(--accent)}
+.search-box::before{content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px}
+
+.ticket-table{width:100%;border-collapse:collapse;font-size:12px}
+.ticket-table thead th{padding:8px 12px;text-align:left;color:var(--t3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0}
+.ticket-table tbody tr{cursor:pointer;border-bottom:1px solid var(--border2);transition:background .1s}
+.ticket-table tbody tr:hover td{background:#f7f9fe}
+.ticket-table tbody tr.selected td{background:var(--info-bg)}
+.ticket-table td{padding:10px 12px;color:var(--t1);vertical-align:middle}
+
+.detail-pane{display:flex;flex-direction:column;gap:12px;position:sticky;top:0;max-height:calc(100vh - 120px);overflow-y:auto}
+.detail-pane:empty::after{content:'← Select a ticket to view details';display:block;color:var(--t3);font-size:13px;text-align:center;padding:40px 20px;background:#fff;border-radius:var(--r3);border:1px dashed var(--border)}
+.det-section{background:#fff;border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.det-head{padding:11px 14px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;color:var(--t1)}
+.det-body{padding:14px}
+.det-field{margin-bottom:11px}
+.det-field:last-child{margin-bottom:0}
+.det-label{font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.det-val{font-size:13px;color:var(--t1);line-height:1.4}
+
+.officer-section-panel{display:none;grid-column:1/-1}
+.officer-section-panel.active-section{display:block}
+</style>
+</head>
+<body>
+
+<!-- ===== GLOBAL HEADER ===== -->
+<div id="appHeader">
+  <div class="header-logo">
+    <div class="emblem">🏛️</div>
+    <div class="brand-text">
+      <div class="brand-main">CM Helpline 1905</div>
+      <div class="brand-sub">Uttarakhand Grievance System</div>
+    </div>
+  </div>
+  <div class="role-switcher">
+    <button class="role-btn active" onclick="switchRole('citizen')">👤 Citizen</button>
+    <button class="role-btn" onclick="switchRole('cse')">🎧 Support Executive</button>
+    <button class="role-btn" onclick="switchRole('officer')">🏢 Nodal Officer</button>
+  </div>
+  <div class="demo-badge">Demo Mode</div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- ========== CITIZEN VIEW ========== -->
+<div class="view active" id="citizenView">
+  <div class="citizen-hero">
+    <div class="citizen-container">
+      <div class="citizen-hero-content">
+        <h1>Submit & Track Your Grievance</h1>
+        <p>File a complaint, track its status, or check your past submissions — all in one place.</p>
+      </div>
+      <div class="citizen-tabs">
+        <button class="citizen-tab active" onclick="citizenTab('submit',this)">📝 Submit Grievance</button>
+        <button class="citizen-tab" onclick="citizenTab('track',this)">🔎 Track Status</button>
+        <button class="citizen-tab" onclick="citizenTab('mytickets',this)">📋 My Tickets</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="citizen-content">
+
+    <!-- SUBMIT TAB -->
+    <div id="tab-submit">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">📝 New Grievance</span>
+          <span style="font-size:11px;color:var(--t3)">Fields marked * are mandatory</span>
+        </div>
+        <div class="card-body">
+          <div id="submitFormWrap">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input class="form-control" id="cit-name" type="text" placeholder="e.g. Raju Verma">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mobile Number *</label>
+                <input class="form-control" id="cit-phone" type="text" placeholder="+91 XXXXX XXXXX">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">District *</label>
+                <select class="form-control" id="cit-district">
+                  <option value="">Select district...</option>
+                  <option>Dehradun</option><option>Haridwar</option><option>Nainital</option>
+                  <option>Almora</option><option>Chamoli</option><option>Uttarkashi</option>
+                  <option>Pauri Garhwal</option><option>Tehri Garhwal</option><option>Rudraprayag</option>
+                  <option>Pithoragarh</option><option>Champawat</option><option>Bageshwar</option><option>Udham Singh Nagar</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tehsil / Ward</label>
+                <input class="form-control" id="cit-tehsil" type="text" placeholder="e.g. Sadar, Ward 7">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Category *</label>
+                <select class="form-control" id="cit-cat">
+                  <option value="">Select category...</option>
+                  <option>Water supply — no supply</option><option>Water supply — low pressure</option>
+                  <option>Water leakage / pipe burst</option><option>New water connection</option>
+                  <option>Bill dispute / excess billing</option><option>Sewage overflow / blockage</option>
+                  <option>Road damage</option><option>Street light not working</option>
+                  <option>Garbage not collected</option><option>Electricity supply issue</option>
+                  <option>Ration / PDS issue</option><option>Pension not received</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <select class="form-control" id="cit-dept">
+                  <option value="">Auto-detected from category</option>
+                  <option>Jal Sansthan</option><option>Nagar Palika</option>
+                  <option>PWD</option><option>UPCL (Electricity)</option>
+                  <option>Food & Civil Supplies</option><option>Social Welfare</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description *</label>
+              <textarea class="form-control" id="cit-desc" rows="4" placeholder="Please describe your problem in detail — how long has it been, how many people are affected, etc."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preferred Language for Updates</label>
+              <select class="form-control" id="cit-lang">
+                <option>Hindi (हिन्दी)</option><option>English</option><option>Garhwali</option><option>Kumaoni</option>
+              </select>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px">
+              <button class="btn" onclick="citizenReset()">Reset</button>
+              <button class="btn btn-primary btn-lg" onclick="submitGrievance()">Submit Grievance →</button>
+            </div>
+          </div>
+          <div class="submit-success" id="submitSuccess">
+            <div class="success-icon">✅</div>
+            <div style="font-size:16px;font-weight:700;margin-bottom:4px">Grievance Submitted Successfully!</div>
+            <div style="font-size:13px;color:var(--t2);margin-bottom:12px">Your ticket number is:</div>
+            <div class="success-ticket" id="newTicketId">UK-DH-JS-0000</div>
+            <div style="font-size:13px;color:var(--t2);margin-bottom:20px">SMS and WhatsApp notification sent to your mobile number.<br>Expected resolution within <strong>72 hours</strong>.</div>
+            <div class="citizen-notif">
+              📱 <strong>SMS Sent:</strong> Aapki shikayat darj kar li gayi hai. Ticket no: <span id="smsTicketId"></span>. Vibhag: Jal Sansthan. Samadhan 72 ghante mein diya jayega. Status check: SMS STATUS &lt;ticket no&gt; to 1905.
+            </div>
+            <div style="display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap">
+              <button class="btn" onclick="citizenTab('track',null);document.getElementById('trackInput').value=document.getElementById('newTicketId').textContent;trackTicket()">Track This Ticket</button>
+              <button class="btn btn-primary" onclick="submitAnother()">Submit Another</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRACK TAB -->
+    <div id="tab-track" style="display:none">
+      <div class="card">
+        <div class="card-head"><span class="card-title">🔎 Track Your Grievance</span></div>
+        <div class="card-body">
+          <div class="track-input-row">
+            <input class="form-control" id="trackInput" placeholder="Enter ticket ID e.g. UK-DH-JS-0412" style="font-family:var(--mono);font-size:13px">
+            <button class="btn btn-primary" onclick="trackTicket()">Track →</button>
+          </div>
+          <div style="font-size:12px;color:var(--t3);margin-top:-8px;margin-bottom:12px">Try: UK-DH-JS-0412 · UK-DH-JS-0401 · UK-DH-JS-0395 · UK-DH-JS-0381</div>
+          <div class="ticket-result" id="ticketResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY TICKETS TAB -->
+    <div id="tab-mytickets" style="display:none">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">📋 My Tickets</span>
+          <span style="font-size:11px;color:var(--t3)">Meera Devi · +91 9412XXXXXX</span>
+        </div>
+        <div class="card-body">
+          <div class="my-tickets-list" id="myTicketsList"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== CSE VIEW ========== -->
+<div class="view" id="cseView">
+  <div class="cse-layout">
+
+    <!-- LEFT: ACTIVE CALL -->
+    <div>
+      <div class="cse-panel-title">Active Call</div>
+      <div id="cseFormPanel">
+        <div class="call-indicator">
+          <div class="call-dot"></div>
+          <div class="call-info" id="cseCallInfo">📞 Incoming — +91 9876XXXXXX (Ramesh Kumar, Haridwar)</div>
+          <div class="call-timer" id="cseTimer">04:23</div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head">
+            <span class="card-title">🎙️ Live Transcription</span>
+            <span id="transcriptStatus" style="font-size:11px;color:var(--suc);font-weight:600">● Recording</span>
+          </div>
+          <div class="card-body" style="padding:12px 14px">
+            <div class="transcript-box" id="transcriptBox">
+              Hamare ghar mein teen din se pani nahi aa raha hai. Pump station se supply band ho gayi hai. Chhote bachche aur budhay pareshan hain. Koi dekhne bhi nahi aaya<span class="transcript-cursor"></span>
+            </div>
+            <div class="ai-fill-bar">
+              <div>🤖</div>
+              <div class="ai-fill-label">AI processing transcription...</div>
+              <div class="ai-progress"><div class="ai-progress-fill" id="aiProgressFill"></div></div>
+              <button class="btn btn-sm" id="aiFillBtn" onclick="runAiFill()">⚡ AI Fill Fields</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">📋 Grievance Details</span>
+            <span class="ai-tag" id="aiTagLabel" style="display:none">AI Assisted</span>
+          </div>
+          <div class="card-body">
+            <div id="cseSubmitSuccessPanel" class="cse-submit-success">
+              <div style="font-size:36px;margin-bottom:10px">✅</div>
+              <div style="font-size:15px;font-weight:700;margin-bottom:4px">Ticket Created!</div>
+              <div class="success-ticket" id="cseNewTicketId" style="margin:8px 0"></div>
+              <div style="font-size:13px;color:var(--t2);margin-bottom:16px">Citizen notified via SMS & WhatsApp.<br>Ticket routed to nodal officer.</div>
+              <button class="btn btn-primary" onclick="cseNextCall()">📞 Next Call →</button>
+            </div>
+            <div id="cseFormFields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Caller Name *</label>
+                  <input class="form-control" id="cse-name" type="text" value="Ramesh Kumar">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Mobile *</label>
+                  <input class="form-control" id="cse-phone" type="text" value="+91 9876XXXXXX" style="font-family:var(--mono)">
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">District *</label>
+                  <select class="form-control" id="cse-district">
+                    <option>Haridwar</option><option>Dehradun</option><option>Nainital</option><option>Almora</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tehsil / Ward</label>
+                  <input class="form-control" id="cse-tehsil" type="text" placeholder="e.g. Jwalapur, Ward 4">
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Category</label>
+                  <input class="form-control" id="cse-cat" type="text" placeholder="AI will detect...">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <input class="form-control" id="cse-dept" type="text" placeholder="AI will detect...">
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Priority</label>
+                  <input class="form-control" id="cse-priority" type="text" placeholder="AI will classify...">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Sentiment</label>
+                  <input class="form-control" id="cse-sentiment" type="text" placeholder="AI will detect...">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Agent Notes</label>
+                <textarea class="form-control" id="cse-notes" rows="3" placeholder="Add additional observations or context..."></textarea>
+              </div>
+              <div class="cse-action-row">
+                <button class="btn btn-primary" onclick="cseSubmitTicket()">✅ Submit Ticket</button>
+                <button class="btn btn-warn" onclick="showModal('escalate')">⚠️ Escalate</button>
+                <button class="btn" onclick="showModal('transfer')">🔀 Transfer Call</button>
+                <button class="btn" style="margin-left:auto;color:var(--dan)" onclick="showModal('endcall')">📵 End Call</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: QUEUE + STATS -->
+    <div>
+      <div class="cse-panel-title">CSE Dashboard</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <div class="card" style="text-align:center;padding:12px">
+          <div style="font-size:22px;font-weight:700;color:var(--dan)">3</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">In Queue</div>
+        </div>
+        <div class="card" style="text-align:center;padding:12px">
+          <div style="font-size:22px;font-weight:700;color:var(--suc)">14</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">Resolved Today</div>
+        </div>
+        <div class="card" style="text-align:center;padding:12px">
+          <div style="font-size:22px;font-weight:700;color:var(--warn)">3m 12s</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">Avg Handle Time</div>
+        </div>
+        <div class="card" style="text-align:center;padding:12px">
+          <div style="font-size:22px;font-weight:700;color:var(--accent)">4.6</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">CSAT Score</div>
+        </div>
+      </div>
+
+      <div class="cse-panel-title">Call Queue</div>
+      <div id="callQueue">
+        <div class="queue-item active-item" onclick="selectQueue(this,'Ramesh Kumar','+91 9876XXXXXX','Haridwar','No water supply — 3 days')">
+          <div><span class="queue-status-badge qb-active">Active</span><div class="queue-caller">Ramesh Kumar</div></div>
+          <div class="queue-phone">+91 9876XXXXXX</div>
+          <div class="queue-issue">No water supply — 3 days</div>
+          <div class="queue-wait">⏱ 04:23 on call</div>
+        </div>
+        <div class="queue-item" onclick="selectQueue(this,'Sunita Pant','+91 9456XXXXXX','Dehradun','Street light not working for 2 weeks')">
+          <div><span class="queue-status-badge qb-wait">Waiting</span><div class="queue-caller">Sunita Pant</div></div>
+          <div class="queue-phone">+91 9456XXXXXX</div>
+          <div class="queue-issue">Street light not working for 2 weeks</div>
+          <div class="queue-wait">⏳ Waiting 3m 15s</div>
+        </div>
+        <div class="queue-item" onclick="selectQueue(this,'Mohan Lal','+91 9871XXXXXX','Haridwar','Garbage not collected — 5 days')">
+          <div><span class="queue-status-badge qb-wait">Waiting</span><div class="queue-caller">Mohan Lal</div></div>
+          <div class="queue-phone">+91 9871XXXXXX</div>
+          <div class="queue-issue">Garbage not collected — 5 days</div>
+          <div class="queue-wait">⏳ Waiting 1m 42s</div>
+        </div>
+        <div class="queue-item" onclick="selectQueue(this,'Kavita Sharma','+91 9012XXXXXX','Nainital','Pension not credited this month')">
+          <div><span class="queue-status-badge qb-wait">Waiting</span><div class="queue-caller">Kavita Sharma</div></div>
+          <div class="queue-phone">+91 9012XXXXXX</div>
+          <div class="queue-issue">Pension not credited this month</div>
+          <div class="queue-wait">⏳ Waiting 0m 58s</div>
+        </div>
+      </div>
+
+      <div class="cse-panel-title" style="margin-top:16px">Recently Resolved</div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;font-size:12px;color:var(--t2)">
+        <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border2)">✅ UK-DH-JS-0405 · Leakage · Resolved</div>
+        <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border2)">✅ UK-DH-JS-0403 · Bill dispute · Resolved</div>
+        <div>✅ UK-DH-JS-0400 · New connection · Transferred</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== OFFICER VIEW ========== -->
+<div class="view" id="officerView">
+  <div class="officer-layout">
+
+    <!-- SIDEBAR -->
+    <div class="officer-sidebar">
+      <div class="sidebar-officer-chip">
+        <div class="officer-avatar">RS</div>
+        <div>
+          <div class="officer-name">Rajesh Sharma</div>
+          <div class="officer-dept">Jal Sansthan, Dehradun</div>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Grievances</div>
+        <button class="sidebar-item active" onclick="officerNav('dashboard',this)"><span class="ic">📊</span>Dashboard</button>
+        <button class="sidebar-item" onclick="officerNav('tickets',this)"><span class="ic">📋</span>All Tickets<span class="sidebar-badge">24</span></button>
+        <button class="sidebar-item" onclick="officerNav('escalated',this)"><span class="ic">⚠️</span>Escalated<span class="sidebar-badge">3</span></button>
+        <button class="sidebar-item" onclick="officerNav('resolved',this)"><span class="ic">✅</span>Resolved</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Tools</div>
+        <button class="sidebar-item" onclick="showModal('report')"><span class="ic">📈</span>Reports</button>
+        <button class="sidebar-item" onclick="showModal('team')"><span class="ic">👥</span>Field Teams</button>
+        <button class="sidebar-item" onclick="showModal('sla')"><span class="ic">⏱</span>SLA Monitor<span class="sidebar-badge sidebar-badge-w">7</span></button>
+        <button class="sidebar-item" onclick="showModal('notify')"><span class="ic">🔔</span>Notifications</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <button class="sidebar-item" onclick="showModal('profile')"><span class="ic">⚙️</span>Settings</button>
+        <button class="sidebar-item" onclick="showToast('Logged out','')" style="color:rgba(255,80,80,.6)"><span class="ic">🚪</span>Logout</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="officer-main">
+      <div class="officer-topbar">
+        <div class="officer-topbar-title" id="officerSectionTitle">Dashboard</div>
+        <button class="btn btn-sm" onclick="showModal('notifications')">🔔 <span style="background:var(--dan);color:#fff;padding:1px 6px;border-radius:10px;font-size:10px">5</span></button>
+        <button class="btn btn-sm btn-primary" onclick="showModal('addticket')">+ New Ticket</button>
+      </div>
+      <div class="officer-content" id="officerContent">
+
+        <!-- METRICS -->
+        <div class="officer-metrics">
+          <div class="metric-card">
+            <div class="metric-label">Assigned</div>
+            <div class="metric-val">24</div>
+            <div class="metric-sub">Total open tickets</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Due Today</div>
+            <div class="metric-val" style="color:var(--warn)">7</div>
+            <div class="metric-sub">SLA expiring today</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">SLA Breached</div>
+            <div class="metric-val" style="color:var(--dan)">3</div>
+            <div class="metric-sub"><span class="metric-trend down">↑ 1 from yesterday</span></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Avg CSAT</div>
+            <div class="metric-val" style="color:var(--suc)">4.2</div>
+            <div class="metric-sub"><span class="metric-trend up">↑ 0.3 this week</span></div>
+          </div>
+        </div>
+
+        <!-- TICKETS TABLE -->
+        <div class="tickets-panel">
+          <div class="filter-row">
+            <button class="fpill active" onclick="filterTickets('all',this)">All (6)</button>
+            <button class="fpill" onclick="filterTickets('high',this)">🔴 High Priority</button>
+            <button class="fpill" onclick="filterTickets('open',this)">Open</button>
+            <button class="fpill" onclick="filterTickets('prog',this)">In Progress</button>
+            <button class="fpill" onclick="filterTickets('esc',this)">⚠️ Escalated</button>
+            <button class="fpill" onclick="filterTickets('done',this)">✅ Resolved</button>
+            <div class="search-box">
+              <input type="text" id="officerSearch" placeholder="Search tickets..." oninput="searchTickets(this.value)">
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden">
+            <table class="ticket-table">
+              <thead>
+                <tr>
+                  <th>Ticket ID</th>
+                  <th>Priority</th>
+                  <th>Citizen / Category</th>
+                  <th>Status</th>
+                  <th>SLA</th>
+                </tr>
+              </thead>
+              <tbody id="ticketBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DETAIL PANE -->
+        <div class="detail-pane" id="detailPane"></div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SHARED DATA =====
+let nextId = 413;
+const DB = {
+  tickets: [
+    {id:'UK-DH-JS-0412',cat:'Water supply — no supply',desc:'Hamare ward mein 4 din se pani nahi aa raha. Bache aur budhay sab pareshan hain. Koi sunne wala nahi.',prio:'high',status:'prog',dept:'Jal Sansthan',citizen:'Meera Devi',phone:'+91 9412XXXXXX',dist:'Dehradun',tehsil:'Sadar / Ward 7, Rajpur Road',sla:55,assigned:'5 Apr 09:10 AM',ai:'Dispatch field team to Rajpur Road pumping station PS-RJ-07. Inspect gate valve V-14 (failed twice in Jan, Mar 2024). Estimated fix time: 4-6 hrs. Parts available in Sadar store.',timeline:[{t:'5 Apr 09:00',txt:'Ticket created via 1905 call',a:false},{t:'5 Apr 09:01',txt:'AI classified: Water supply — High priority',a:false},{t:'5 Apr 09:10',txt:'Routed to Jal Sansthan, Rajesh Sharma',a:false},{t:'5 Apr 10:30',txt:'Field team dispatched to PS-RJ-07',a:true}]},
+    {id:'UK-DH-JS-0401',cat:'New water connection',desc:'Applied for new water connection 45 days ago. No response. Connection needed for new house.',prio:'med',status:'open',dept:'Jal Sansthan',citizen:'Priya Rawat',phone:'+91 9456XXXXXX',dist:'Dehradun',tehsil:'Rishikesh',sla:40,assigned:'2 Apr 11:00 AM',ai:'Application ID WC-2024-9872 found in system. Status: pending JE inspection. Recommend: assign JE for site inspection within 24 hrs to meet 45-day SLA.',timeline:[{t:'2 Apr 11:00',txt:'Ticket created via citizen portal',a:false},{t:'2 Apr 11:01',txt:'Linked to existing application WC-2024-9872',a:false},{t:'3 Apr',txt:'Awaiting JE assignment',a:true}]},
+    {id:'UK-DH-JS-0399',cat:'Bill dispute / excess billing',desc:'Water bill shows Rs 4,800 for one month which is abnormally high. No leakage at home.',prio:'low',status:'prog',dept:'Jal Sansthan',citizen:'Amit Bisht',phone:'+91 9760XXXXXX',dist:'Dehradun',tehsil:'Doiwala',sla:75,assigned:'1 Apr 09:30 AM',ai:'Meter reading in system shows 480 units. Average consumption for this connection is 42 units. Likely meter fault. Recommend: meter replacement + revised bill generation.',timeline:[{t:'1 Apr 09:30',txt:'Ticket created via SMS',a:false},{t:'1 Apr 10:00',txt:'AI detected billing anomaly — 10x usage',a:false},{t:'2 Apr',txt:'Meter inspection scheduled',a:false},{t:'4 Apr',txt:'Meter found faulty — replacement ordered',a:true}]},
+    {id:'UK-DH-JS-0395',cat:'Water leakage / pipe burst',desc:'Major road leakage on Gandhi Road near market. Water wasting for 3 days. Road waterlogged.',prio:'high',status:'esc',dept:'Jal Sansthan',citizen:'Ramesh Nautiyal',phone:'+91 9411XXXXXX',dist:'Dehradun',tehsil:'Sadar',sla:12,assigned:'5 Apr 07:45 AM',ai:'GPS coordinates match main line segment ML-GR-04 (installed 2017). Recommend: emergency crew dispatch. Likely pipe joint failure. Estimated repair: 4-5 hrs.',timeline:[{t:'5 Apr 07:45',txt:'Ticket created — 1905 call',a:false},{t:'5 Apr 07:46',txt:'AI flagged: public infrastructure, high urgency',a:false},{t:'5 Apr 08:00',txt:'Assigned to Rajesh Sharma',a:false},{t:'5 Apr 11:00',txt:'Escalated — SLA at risk',a:true}]},
+    {id:'UK-DH-JS-0381',cat:'Public tap repair',desc:'Public tap in slum colony not working for 1 week. 50+ families depend on it.',prio:'med',status:'done',dept:'Jal Sansthan',citizen:'Savita Bhandari',phone:'+91 9012XXXXXX',dist:'Dehradun',tehsil:'Sadar',sla:100,assigned:'28 Mar',ai:'Resolved. Tap spindle replaced by field team on 3 Apr. CSAT: 5/5.',timeline:[{t:'28 Mar',txt:'Ticket created',a:false},{t:'29 Mar',txt:'Assigned to field team',a:false},{t:'3 Apr',txt:'Tap spindle replaced — resolved',a:false},{t:'4 Apr',txt:'Citizen confirmed — CSAT 5/5',a:true}]},
+    {id:'UK-DH-JS-0376',cat:'Water supply — low pressure',desc:'Low pressure issue in whole colony. Water comes only for 30 min in morning.',prio:'med',status:'open',dept:'Jal Sansthan',citizen:'Dinesh Joshi',phone:'+91 9785XXXXXX',dist:'Dehradun',tehsil:'Chakrata',sla:35,assigned:'31 Mar',ai:'Pressure logs for this zone show consistent drop since 28 Mar. Likely cause: illegal connection upstream. Recommend: pressure survey on main line ML-CK-11.',timeline:[{t:'31 Mar',txt:'Ticket created via kiosk',a:false},{t:'31 Mar',txt:'AI cluster: 4 similar complaints, same zone',a:false},{t:'1 Apr',txt:'Pressure survey initiated',a:true}]},
+  ],
+  myTickets: ['UK-DH-JS-0412'],
+  add(t){ this.tickets.unshift(t); },
+  update(id,upd){ const t=this.tickets.find(x=>x.id===id); if(t) Object.assign(t,upd); },
+  get(id){ return this.tickets.find(x=>x.id===id); }
+};
+
+// ===== TOAST =====
+function showToast(msg, type='', dur=2800){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+(type||'');
+  setTimeout(()=>t.className='',dur);
+}
+
+// ===== MODAL =====
+function showModal(type){
+  const overlay=document.getElementById('modal');
+  const content=document.getElementById('modalContent');
+  const titles={
+    escalate:'⚠️ Escalate Call',transfer:'🔀 Transfer Call',endcall:'📵 End Call',
+    report:'📈 Reports',team:'👥 Field Teams',sla:'⏱ SLA Monitor',notify:'🔔 Send Notification',
+    notifications:'🔔 Notifications',addticket:'➕ Add Ticket Manually',
+    profile:'⚙️ Settings',resolve:'✅ Resolve Ticket',sendupdate:'📱 Send Citizen Update'
+  };
+  const bodies={
+    escalate:`<div class="modal-sub">Escalate this call to a senior officer or specialist team.</div>
+      <div class="form-group"><label class="form-label">Escalate To</label>
+        <select class="form-control"><option>District Collector Office</option><option>Chief Engineer, Jal Sansthan</option><option>CM Office</option></select></div>
+      <div class="form-group"><label class="form-label">Reason</label>
+        <textarea class="form-control" rows="3" placeholder="Reason for escalation..."></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="closeModal();showToast('Call escalated to senior officer ⚠️','')">Escalate</button></div>`,
+    transfer:`<div class="modal-sub">Transfer this call to another department or agent.</div>
+      <div class="form-group"><label class="form-label">Transfer To</label>
+        <select class="form-control"><option>PWD Department</option><option>UPCL (Electricity)</option><option>Nagar Palika</option><option>Social Welfare</option></select></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="closeModal();showToast('Call transferred successfully 🔀','success')">Transfer</button></div>`,
+    endcall:`<div class="modal-sub">Are you sure you want to end this call without submitting a ticket?</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="closeModal();showToast('Call ended','')">End Call</button></div>`,
+    report:`<div class="modal-sub">Download grievance reports for your jurisdiction.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        <button class="btn" onclick="showToast('Downloading Daily Report PDF...','success');closeModal()">📄 Daily Report (PDF)</button>
+        <button class="btn" onclick="showToast('Downloading Weekly Excel...','success');closeModal()">📊 Weekly Summary (Excel)</button>
+        <button class="btn" onclick="showToast('Downloading SLA Report...','success');closeModal()">⏱ SLA Compliance Report</button>
+      </div>`,
+    team:`<div class="modal-sub">Field teams currently available for dispatch.</div>
+      <div style="font-size:13px;border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:8px"><span style="background:var(--suc-bg);color:var(--suc);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">Available</span><span>Team A — JE Mohan Singh (2 technicians)</span></div>
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:8px"><span style="background:#FFF3E0;color:#B45309;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">Busy</span><span>Team B — JE Suresh Kumar (on site PS-RJ-07)</span></div>
+        <div style="padding:10px 12px;display:flex;align-items:center;gap:8px"><span style="background:var(--suc-bg);color:var(--suc);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">Available</span><span>Team C — JE Pradeep Rawat (3 technicians)</span></div>
+      </div>
+      <div style="margin-top:12px;display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="closeModal();showToast('Team C dispatched 🚚','success')">Dispatch Team C</button></div>`,
+    sla:`<div class="modal-sub">Tickets at risk of SLA breach.</div>
+      <div style="font-size:12px;border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:12px">
+        <div style="padding:8px 12px;background:var(--dan-bg);border-bottom:1px solid var(--dan-b);font-weight:600;font-size:11px;color:var(--dan)">🔴 BREACHED (3)</div>
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border2)">UK-DH-JS-0395 · Leakage · Escalated</div>
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border2)">UK-DH-JS-0390 · Pipe burst · Open</div>
+        <div style="padding:8px 12px">UK-DH-JS-0385 · Supply — low pressure · Open</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="closeModal();showToast('SLA breach report sent to District Collector','success')">Alert District Collector</button></div>`,
+    notifications:`<div class="modal-sub">Recent system notifications.</div>
+      <div style="font-size:12px;display:flex;flex-direction:column;gap:8px">
+        <div style="padding:10px;background:var(--dan-bg);border-radius:var(--r1);color:var(--dan)">🔴 UK-DH-JS-0395 SLA breached — escalated automatically</div>
+        <div style="padding:10px;background:var(--warn-bg);border-radius:var(--r1);color:var(--warn)">⚠️ 7 tickets due for resolution today</div>
+        <div style="padding:10px;background:var(--info-bg);border-radius:var(--r1);color:var(--accent)">📊 AI suggestion updated for UK-DH-JS-0412</div>
+        <div style="padding:10px;background:var(--suc-bg);border-radius:var(--r1);color:var(--suc)">✅ UK-DH-JS-0381 closed — CSAT 5/5</div>
+        <div style="padding:10px;background:var(--suc-bg);border-radius:var(--r1);color:var(--suc)">✅ UK-DH-JS-0377 closed — CSAT 4/5</div>
+      </div>`,
+    addticket:`<div class="modal-sub">Manually add a new grievance ticket.</div>
+      <div class="form-grid"><div class="form-group"><label class="form-label">Citizen Name</label><input class="form-control" id="man-name" placeholder="Full name"></div><div class="form-group"><label class="form-label">Mobile</label><input class="form-control" id="man-phone" placeholder="+91..."></div></div>
+      <div class="form-group"><label class="form-label">Category</label><select class="form-control" id="man-cat"><option>Water supply — no supply</option><option>Water leakage</option><option>New connection</option><option>Bill dispute</option></select></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="manualAddTicket()">Create Ticket</button></div>`,
+    profile:`<div class="modal-sub">Officer profile & notification settings.</div>
+      <div class="form-group"><label class="form-label">Name</label><input class="form-control" value="Rajesh Sharma"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-control" value="r.sharma@jalsansthan.uk.gov.in"></div>
+      <div class="form-group"><label class="form-label">SMS Alerts</label><select class="form-control"><option>All tickets</option><option>High priority only</option></select></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn btn-primary" onclick="closeModal();showToast('Settings saved ✓','success')">Save Settings</button></div>`,
+    resolve:`<div class="modal-sub">Mark this ticket as resolved and notify the citizen.</div>
+      <div class="form-group"><label class="form-label">Resolution Notes</label><textarea class="form-control" id="res-notes" rows="4" placeholder="Describe what action was taken to resolve the issue..."></textarea></div>
+      <div class="form-group"><label class="form-label">Resolved By</label><input class="form-control" value="Rajesh Sharma / Team B"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-success" onclick="resolveSelected()">✅ Mark Resolved & Notify</button></div>`,
+    sendupdate:`<div class="modal-sub">Send a status update to the citizen via WhatsApp and SMS.</div>
+      <div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="upd-msg" rows="4"></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="closeModal();showToast('Update sent via SMS & WhatsApp 📱','success')">Send Update</button></div>`,
+  };
+  content.innerHTML=`<button class="modal-close" onclick="closeModal()">✕</button><div class="modal-title">${titles[type]||'Action'}</div>${bodies[type]||'<p>Coming soon.</p>'}`;
+  overlay.classList.add('open');
+}
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modal'))return;
+  document.getElementById('modal').classList.remove('open');
+}
+function manualAddTicket(){
+  const n=document.getElementById('man-name').value||'Unknown Citizen';
+  const ph=document.getElementById('man-phone').value||'+91 XXXXXXXXXX';
+  const cat=document.getElementById('man-cat').value;
+  const id='UK-DH-JS-0'+nextId;
+  DB.add({id,cat,desc:'Manually added ticket.',prio:'med',status:'open',dept:'Jal Sansthan',citizen:n,phone:ph,dist:'Dehradun',tehsil:'Sadar',sla:70,assigned:'Just now',ai:'Review manually submitted ticket and classify priority.',timeline:[{t:'Just now',txt:'Ticket manually created by officer',a:true}]});
+  nextId++;
+  closeModal();renderOfficerTickets(currentFilter);
+  showToast(`Ticket ${id} created ✓`,'success');
+}
+
+// ===== ROLE SWITCHING =====
+function switchRole(role){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(role+'View').classList.add('active');
+  document.querySelectorAll('.role-btn').forEach(b=>{
+    if(b.textContent.toLowerCase().includes(role==='cse'?'support':role)) b.classList.add('active');
+  });
+  if(role==='officer') renderOfficerTickets('all');
+  if(role==='citizen') renderMyTickets();
+}
+
+// ===== CITIZEN =====
+function citizenTab(tab, el){
+  ['submit','track','mytickets'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
+  document.getElementById('tab-'+tab).style.display='block';
+  document.querySelectorAll('.citizen-tab').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  else{
+    const tabs=['submit','track','mytickets'];
+    document.querySelectorAll('.citizen-tab')[tabs.indexOf(tab)].classList.add('active');
+  }
+  if(tab==='mytickets') renderMyTickets();
+}
+
+function submitGrievance(){
+  const name=document.getElementById('cit-name').value.trim();
+  const phone=document.getElementById('cit-phone').value.trim();
+  const district=document.getElementById('cit-district').value;
+  const cat=document.getElementById('cit-cat').value;
+  const desc=document.getElementById('cit-desc').value.trim();
+  if(!name||!phone||!district||!cat||!desc){showToast('Please fill all mandatory fields','error');return;}
+  const id='UK-DH-JS-0'+nextId;
+  const deptMap={'Water supply — no supply':'Jal Sansthan','Water supply — low pressure':'Jal Sansthan','Water leakage / pipe burst':'Jal Sansthan','New water connection':'Jal Sansthan','Bill dispute / excess billing':'Jal Sansthan','Sewage overflow / blockage':'Nagar Palika','Road damage':'PWD','Street light not working':'UPCL (Electricity)','Garbage not collected':'Nagar Palika','Electricity supply issue':'UPCL (Electricity)','Ration / PDS issue':'Food & Civil Supplies','Pension not received':'Social Welfare','Other':'Collector Office'};
+  const dept=document.getElementById('cit-dept').value||deptMap[cat]||'Jal Sansthan';
+  DB.add({id,cat,desc,prio:'med',status:'open',dept,citizen:name,phone,dist:district,tehsil:document.getElementById('cit-tehsil').value||district,sla:70,assigned:'Just now',ai:`Review new ${cat} complaint. Auto-classified by AI. Manual inspection recommended.`,timeline:[{t:'Just now',txt:'Ticket created via citizen portal',a:false},{t:'Just now',txt:'SMS & WhatsApp notification sent to citizen',a:true}]});
+  DB.myTickets.push(id);
+  nextId++;
+  document.getElementById('newTicketId').textContent=id;
+  document.getElementById('smsTicketId').textContent=id;
+  document.getElementById('submitFormWrap').classList.add('hide');
+  document.getElementById('submitSuccess').classList.add('show');
+}
+
+function submitAnother(){
+  document.getElementById('submitFormWrap').classList.remove('hide');
+  document.getElementById('submitSuccess').classList.remove('show');
+  ['cit-name','cit-phone','cit-tehsil','cit-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cit-district').value='';
+  document.getElementById('cit-cat').value='';
+}
+function citizenReset(){
+  ['cit-name','cit-phone','cit-tehsil','cit-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cit-district').value='';
+  document.getElementById('cit-cat').value='';
+}
+
+function trackTicket(){
+  const input=document.getElementById('trackInput').value.trim().toUpperCase();
+  const result=document.getElementById('ticketResult');
+  if(!input){result.innerHTML='';result.classList.remove('show');return;}
+  const t=DB.get(input);
+  if(!t){
+    result.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t3);background:#fff;border:1px dashed var(--border);border-radius:var(--r2)">❌ No ticket found with ID <strong>${input}</strong>.<br><small>Check the ID and try again.</small></div>`;
+    result.classList.add('show');return;
+  }
+  const slaColor=t.sla<30?'var(--dan)':t.sla<60?'var(--warn)':'var(--suc)';
+  const statusPillMap={open:'pill-open',prog:'pill-prog',esc:'pill-esc',done:'pill-done'};
+  const statusLabelMap={open:'Open',prog:'In Progress',esc:'Escalated',done:'Resolved'};
+  const csatHtml=t.status==='done'?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border2)">
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px">Rate your experience:</div>
+    <div class="csat-stars" id="csatStars">${[1,2,3,4,5].map(i=>`<span class="csat-star ${i<=4?'on':''}" onclick="rateCsat(${i})" title="${i} star">★</span>`).join('')}</div>
+    <div id="csatThanks" style="font-size:12px;color:var(--suc);margin-top:8px;display:none">✅ Thank you for your feedback!</div>
+  </div>`:'';
+  result.innerHTML=`<div class="status-card">
+    <div class="status-card-head" style="background:#fff">
+      <div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Ticket ID</div>
+        <div class="ticket-id-display">${t.id}</div>
+      </div>
+      <span class="pill ${statusPillMap[t.status]||'pill-open'}" style="font-size:12px;padding:5px 14px">${statusLabelMap[t.status]||t.status}</span>
+    </div>
+    <div class="status-card-meta">
+      <div class="meta-item"><div class="meta-label">Category</div><div class="meta-val">${t.cat}</div></div>
+      <div class="meta-item"><div class="meta-label">Department</div><div class="meta-val">${t.dept}</div></div>
+      <div class="meta-item"><div class="meta-label">Submitted</div><div class="meta-val">${t.assigned}</div></div>
+    </div>
+    <div style="padding:14px 18px;background:#fff;border-top:1px solid var(--border2)">
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px">${t.desc}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--t3);margin-bottom:6px">SLA Remaining</div>
+      <div style="font-size:13px;font-weight:600;color:${slaColor};margin-bottom:6px">${t.sla===0?'SLA Breached — Escalated':t.sla+'% remaining'}</div>
+      <div class="sla-track"><div class="sla-fill" style="width:${t.sla}%;background:${slaColor}"></div></div>
+      <div style="font-size:12px;font-weight:600;color:var(--t3);margin-top:14px;margin-bottom:8px">Activity Timeline</div>
+      <ul class="timeline">
+        ${t.timeline.map(tl=>`<li class="tl-item ${tl.a?'active':''}"><div class="tl-text">${tl.txt}</div><div class="tl-time">${tl.t}</div></li>`).join('')}
+      </ul>
+      ${csatHtml}
+    </div>
+  </div>`;
+  result.classList.add('show');
+}
+
+function rateCsat(n){
+  document.querySelectorAll('.csat-star').forEach((s,i)=>s.classList.toggle('on',i<n));
+  document.getElementById('csatThanks').style.display='block';
+  showToast(`Rating ${n}/5 submitted. Thank you!`,'success');
+}
+
+function renderMyTickets(){
+  const list=document.getElementById('myTicketsList');
+  const myIds=DB.myTickets;
+  const myT=DB.tickets.filter(t=>myIds.includes(t.id));
+  const statusLabelMap={open:'Open',prog:'In Progress',esc:'Escalated',done:'Resolved'};
+  const pillMap={open:'pill-open',prog:'pill-prog',esc:'pill-esc',done:'pill-done'};
+  if(!myT.length){list.innerHTML='<div style="text-align:center;padding:30px;color:var(--t3)">No tickets found. Submit your first grievance!</div>';return;}
+  list.innerHTML=myT.map(t=>`
+    <div class="my-ticket-card" onclick="citizenTab('track',null);document.getElementById('trackInput').value='${t.id}';trackTicket()">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span class="my-ticket-id">${t.id}</span>
+          <span class="pill ${pillMap[t.status]||'pill-open'}" style="font-size:10px">${statusLabelMap[t.status]||t.status}</span>
+        </div>
+        <div class="my-ticket-cat">${t.cat}</div>
+        <div class="my-ticket-desc">${t.desc.substring(0,80)}${t.desc.length>80?'...':''}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:11px;color:var(--t3)">${t.assigned}</div>
+        <div style="font-size:12px;font-weight:600;color:${t.sla<30?'var(--dan)':t.sla<60?'var(--warn)':'var(--suc)'};margin-top:4px">${t.sla}% SLA</div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== CSE =====
+let cseAiFilled=false;
+function runAiFill(){
+  if(cseAiFilled)return;
+  const fill=document.getElementById('aiProgressFill');
+  const btn=document.getElementById('aiFillBtn');
+  btn.disabled=true; btn.textContent='Processing...';
+  let w=0;
+  const int=setInterval(()=>{w+=8;fill.style.width=w+'%';if(w>=100){clearInterval(int);doAiFill();}},80);
+}
+function doAiFill(){
+  const fields=[
+    {id:'cse-tehsil',val:'Jwalapur, Ward 14'},
+    {id:'cse-cat',val:'Water supply — no supply'},
+    {id:'cse-dept',val:'Jal Sansthan, Haridwar'},
+    {id:'cse-priority',val:'High — 3+ days, multiple families'},
+    {id:'cse-sentiment',val:'Distressed — urgent escalation flag'},
+  ];
+  let i=0;
+  const int=setInterval(()=>{
+    if(i>=fields.length){clearInterval(int);document.getElementById('aiTagLabel').style.display='inline';cseAiFilled=true;
+    document.getElementById('aiFillBtn').textContent='✓ AI Filled';showToast('AI fields auto-filled from transcription ✨','success');return;}
+    const el=document.getElementById(fields[i].id);
+    el.value=fields[i].val; el.classList.add('ai-filled'); i++;
+  },320);
+}
+
+let timerSec=263;
+setInterval(()=>{
+  timerSec++;const m=Math.floor(timerSec/60),s=timerSec%60;
+  const el=document.getElementById('cseTimer');
+  if(el)el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+},1000);
+
+function selectQueue(el,name,phone,district,issue){
+  document.querySelectorAll('.queue-item').forEach(q=>q.classList.remove('active-item'));
+  el.classList.add('active-item');
+  document.getElementById('cse-name').value=name;
+  document.getElementById('cse-phone').value=phone;
+  document.getElementById('cse-district').value=district;
+  document.getElementById('cse-cat').value='';
+  document.getElementById('cse-dept').value='';
+  document.getElementById('cse-priority').value='';
+  document.getElementById('cse-sentiment').value='';
+  document.getElementById('cse-tehsil').value='';
+  document.getElementById('cse-notes').value='';
+  ['cse-cat','cse-dept','cse-priority','cse-sentiment'].forEach(id=>{
+    const el=document.getElementById(id);el.classList.remove('ai-filled');el.placeholder='AI will detect...';
+  });
+  document.getElementById('cseCallInfo').textContent=`📞 Active — ${phone} (${name}, ${district})`;
+  document.getElementById('aiProgressFill').style.width='0';
+  document.getElementById('aiFillBtn').disabled=false;
+  document.getElementById('aiFillBtn').textContent='⚡ AI Fill Fields';
+  document.getElementById('aiTagLabel').style.display='none';
+  document.getElementById('transcriptBox').innerHTML=`<em style="color:var(--t3)">Transcription will appear here as call progresses...</em><span class="transcript-cursor"></span>`;
+  cseAiFilled=false;timerSec=0;
+  showToast(`Switched to call: ${name}`,'');
+}
+
+function cseSubmitTicket(){
+  const name=document.getElementById('cse-name').value.trim();
+  const phone=document.getElementById('cse-phone').value.trim();
+  const cat=document.getElementById('cse-cat').value.trim();
+  if(!name||!cat){showToast('Please fill Caller Name and Category at minimum','error');return;}
+  const id='UK-DH-JS-0'+nextId;
+  DB.add({id,cat:cat||'Water supply — no supply',desc:document.getElementById('cse-notes').value||'Complaint received via 1905 call.',prio:document.getElementById('cse-priority').value.toLowerCase().includes('high')?'high':'med',status:'open',dept:document.getElementById('cse-dept').value||'Jal Sansthan',citizen:name,phone,dist:document.getElementById('cse-district').value||'Haridwar',tehsil:document.getElementById('cse-tehsil').value||'',sla:70,assigned:'Just now',ai:`New ticket from 1905 call. Category: ${cat}. Review and assign field team.`,timeline:[{t:'Just now',txt:'Ticket created via 1905 call (CSE)',a:false},{t:'Just now',txt:'Citizen notified via SMS & WhatsApp',a:true}]});
+  nextId++;
+  document.getElementById('cseNewTicketId').textContent=id;
+  document.getElementById('cseFormFields').style.display='none';
+  document.getElementById('cseSubmitSuccessPanel').classList.add('show');
+  showToast(`Ticket ${id} created and routed ✅`,'success');
+}
+
+function cseNextCall(){
+  document.getElementById('cseFormFields').style.display='block';
+  document.getElementById('cseSubmitSuccessPanel').classList.remove('show');
+  document.getElementById('cse-name').value='Sunita Pant';
+  document.getElementById('cse-phone').value='+91 9456XXXXXX';
+  document.getElementById('cse-district').value='Dehradun';
+  document.getElementById('cse-tehsil').value='';
+  ['cse-cat','cse-dept','cse-priority','cse-sentiment'].forEach(id=>{
+    const el=document.getElementById(id);el.value='';el.classList.remove('ai-filled');
+  });
+  document.getElementById('cse-notes').value='';
+  document.getElementById('cseCallInfo').textContent='📞 Incoming — +91 9456XXXXXX (Sunita Pant, Dehradun)';
+  document.getElementById('aiProgressFill').style.width='0';
+  document.getElementById('aiFillBtn').disabled=false;document.getElementById('aiFillBtn').textContent='⚡ AI Fill Fields';
+  document.getElementById('aiTagLabel').style.display='none';
+  document.getElementById('transcriptBox').innerHTML=`Mere mohalle mein do hafte se ek street light kharab hai. Raat ko bahut andhera rehta hai, mahilayein bahut dar ti hain. Please jaldi theek karwa do.<span class="transcript-cursor"></span>`;
+  cseAiFilled=false;timerSec=0;
+  showToast('Next call connected: Sunita Pant','');
+}
+
+// ===== OFFICER =====
+let selectedTicketId=null, currentFilter='all';
+
+function officerNav(section,el){
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  const titles={dashboard:'Dashboard',tickets:'All Tickets',escalated:'Escalated Tickets',resolved:'Resolved Tickets'};
+  document.getElementById('officerSectionTitle').textContent=titles[section]||section;
+  const filterMap={dashboard:'all',tickets:'all',escalated:'esc',resolved:'done'};
+  filterTickets(filterMap[section]||'all',null);
+}
+
+function slaColor(v){return v<30?'var(--dan)':v<60?'var(--warn)':'var(--suc)'}
+function statusClass(s){return{open:'pill-open',prog:'pill-prog',esc:'pill-esc',done:'pill-done'}[s]||'pill-open'}
+function statusLabel(s){return{open:'Open',prog:'In Progress',esc:'Escalated',done:'Resolved'}[s]||s}
+function prioClass(p){return{high:'dot-high',med:'dot-med',low:'dot-low'}[p]||'dot-low'}
+
+function renderOfficerTickets(filter){
+  let rows=DB.tickets;
+  if(filter==='high') rows=rows.filter(t=>t.prio==='high');
+  else if(filter==='esc') rows=rows.filter(t=>t.status==='esc');
+  else if(filter==='done') rows=rows.filter(t=>t.status==='done');
+  else if(filter==='open') rows=rows.filter(t=>t.status==='open');
+  else if(filter==='prog') rows=rows.filter(t=>t.status==='prog');
+  const q=document.getElementById('officerSearch').value.toLowerCase();
+  if(q) rows=rows.filter(t=>t.id.toLowerCase().includes(q)||t.citizen.toLowerCase().includes(q)||t.cat.toLowerCase().includes(q)||t.dist.toLowerCase().includes(q));
+  document.getElementById('ticketBody').innerHTML=rows.map(t=>`
+    <tr onclick="selectOfficerTicket('${t.id}')" id="orow-${t.id}" class="${selectedTicketId===t.id?'selected':''}">
+      <td style="font-family:var(--mono);font-size:11px;color:var(--t3)">${t.id}</td>
+      <td><span class="dot ${prioClass(t.prio)}" style="margin-right:5px"></span>${t.prio.charAt(0).toUpperCase()+t.prio.slice(1)}</td>
+      <td><div style="font-size:12px;font-weight:500">${t.citizen}</div><div style="font-size:11px;color:var(--t3)">${t.cat}</div></td>
+      <td><span class="pill ${statusClass(t.status)}">${statusLabel(t.status)}</span></td>
+      <td><div style="font-size:11px;font-weight:600;color:${slaColor(t.sla)};margin-bottom:4px">${t.sla===0?'Breached':t.sla+'%'}</div><div class="sla-track" style="width:80px"><div class="sla-fill" style="width:${t.sla}%;background:${slaColor(t.sla)}"></div></div></td>
+    </tr>`).join('');
+}
+
+function selectOfficerTicket(id){
+  selectedTicketId=id;
+  const t=DB.get(id); if(!t) return;
+  document.querySelectorAll('#ticketBody tr').forEach(r=>r.classList.remove('selected'));
+  const row=document.getElementById('orow-'+id); if(row)row.classList.add('selected');
+  const dp=document.getElementById('detailPane');
+  dp.innerHTML=`
+    <div class="det-section">
+      <div class="det-head">
+        <span style="font-family:var(--mono);font-size:12px">${t.id}</span>
+        <span class="pill ${statusClass(t.status)}">${statusLabel(t.status)}</span>
+      </div>
+      <div class="det-body">
+        <div class="ai-box" style="margin-bottom:12px">
+          <div class="ai-label">🤖 AI Copilot Suggestion</div>
+          <div class="ai-text">${t.ai}</div>
+        </div>
+        <div class="det-field"><div class="det-label">Citizen</div><div class="det-val">${t.citizen} <span style="color:var(--t3);font-family:var(--mono);font-size:12px">${t.phone}</span></div></div>
+        <div class="det-field"><div class="det-label">Category / Department</div><div class="det-val"><span class="pill pill-new" style="font-size:11px">${t.cat}</span> · ${t.dept}</div></div>
+        <div class="det-field"><div class="det-label">Location</div><div class="det-val">${t.dist} — ${t.tehsil}</div></div>
+        <div class="det-field"><div class="det-label">Description</div><div class="det-val" style="font-size:12px;color:var(--t2);line-height:1.6">${t.desc}</div></div>
+        <div class="det-field"><div class="det-label">SLA Remaining</div>
+          <div style="font-size:13px;font-weight:600;color:${slaColor(t.sla)};margin-bottom:5px">${t.sla===0?'SLA BREACHED — auto-escalated':t.sla+'% remaining'}</div>
+          <div class="sla-track"><div class="sla-fill" style="width:${t.sla}%;background:${slaColor(t.sla)}"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="det-section">
+      <div class="det-head">Activity Timeline</div>
+      <div class="det-body">
+        <ul class="timeline">
+          ${t.timeline.map(tl=>`<li class="tl-item ${tl.a?'active':''}"><div class="tl-text">${tl.txt}</div><div class="tl-time">${tl.t}</div></li>`).join('')}
+        </ul>
+      </div>
+    </div>
+    <div class="det-section">
+      <div class="det-head">Update Status</div>
+      <div class="det-body">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <select class="form-control" id="statusSelect" style="flex:1" onchange="updateOfficerStatus('${t.id}',this.value)">
+            <option value="open" ${t.status==='open'?'selected':''}>Open</option>
+            <option value="prog" ${t.status==='prog'?'selected':''}>In Progress</option>
+            <option value="esc" ${t.status==='esc'?'selected':''}>Escalate</option>
+            <option value="done" ${t.status==='done'?'selected':''}>Mark Resolved</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-success" onclick="showModal('resolve')">✅ Resolve</button>
+          <button class="btn btn-sm" onclick="showModal('sendupdate');setupSendUpdate('${t.id}','${t.citizen}')">📱 Send Update</button>
+          <button class="btn btn-sm btn-danger" onclick="updateOfficerStatus('${t.id}','esc')">⚠️ Escalate</button>
+          <button class="btn btn-sm" onclick="showModal('team')">🚚 Dispatch Team</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setupSendUpdate(id,citizen){
+  const t=DB.get(id); if(!t)return;
+  const msg=document.getElementById('upd-msg');
+  if(msg) msg.value=`Namaste ${citizen} ji 🙏\nAapka ticket (${id}) ka update:\n\nStatus: ${statusLabel(t.status)}\nVibhag: ${t.dept}\n\nAage ki jaankari milti rahegi. Koi sawaal? Reply HELP karein.`;
+}
+
+function updateOfficerStatus(id,val){
+  DB.update(id,{status:val});
+  renderOfficerTickets(currentFilter);
+  selectOfficerTicket(id);
+  const labels={open:'Status updated to Open',prog:'Status: In Progress. Citizen notified.',esc:'Ticket escalated ⚠️',done:'Ticket marked resolved ✅'};
+  showToast(labels[val]||'Status updated',val==='done'?'success':val==='esc'?'error':'');
+}
+
+function resolveSelected(){
+  if(!selectedTicketId)return;
+  const notes=document.getElementById('res-notes').value;
+  DB.update(selectedTicketId,{status:'done',sla:100});
+  closeModal();
+  renderOfficerTickets(currentFilter);
+  selectOfficerTicket(selectedTicketId);
+  showToast(`Ticket ${selectedTicketId} resolved & citizen notified ✅`,'success');
+}
+
+function filterTickets(f,el){
+  currentFilter=f;
+  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderOfficerTickets(f);
+}
+
+function searchTickets(val){
+  renderOfficerTickets(currentFilter);
+}
+
+// ===== INIT =====
+renderOfficerTickets('all');
+renderMyTickets();
+</script>
+</body>
+</html>
